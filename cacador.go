@@ -36,39 +36,6 @@ type CacadorData struct {
     Cves    []string
 }
 
-// func createJson () string  {
-  // group_json = {
-  //   'group_name': [
-  //       '?'
-  //   ],
-  //   'attribution': [
-  //       '?'
-  //   ],
-  //   'indicators': {
-  //       'ips': extract_ips(text),
-  //       'urls': extract_urls(text),
-  //       'domains': extract_domains(text),
-  //       'emails': extract_emails(text)
-  //   },
-  //   'malware': {
-  //       'filenames': extract_filenames(text),
-  //       'hashes': extract_hashes(text)
-  //   },
-  //   'cves': extract_cves(text),
-  //   'metadata': {
-  //       'report_name': '??',
-  //       'date_analyzed': time.strftime('%Y-%m-%d %H:%M'),
-  //       'source': '??',
-  //       'release_date': '??',
-  //       'tlp': tlp,
-  //       'authors': [
-  //           '??'
-  //       ],
-  //       'file_metadata': metadata
-  //   }
-  // }
-// }
-
 // Hashes
 var md5_regex = regexp.MustCompile("[A-Fa-f0-9]{32}")
 var sha1_regex = regexp.MustCompile("[A-Fa-f0-9]{40}")
@@ -96,6 +63,14 @@ var cve_regex = regexp.MustCompile("(CVE-(19|20)\\d{2}-\\d{4,7})")
 // Snort Signatures
 // Yara Rules
 
+func clean_ipv4(ips []string) []string {
+    for index := 0; index < len(ips); index++ {
+        ips[index] = strings.Replace(ips[index], "[", "", -1)
+        ips[index] = strings.Replace(ips[index], "]", "", -1)
+    }
+    return ips
+}
+
 func main() {
 
     // Get Data from STDIN
@@ -112,7 +87,7 @@ func main() {
     // Network
     domains := domain_regex.FindAllString(data, -1)
     emails := email_regex.FindAllString(data, -1)
-    ipv4s := ipv4_regex.FindAllString(data, -1)
+    ipv4s := clean_ipv4(ipv4_regex.FindAllString(data, -1))
     ipv6s := ipv6_regex.FindAllString(data, -1)
     urls := url_regex.FindAllString(data, -1)
 
@@ -126,20 +101,6 @@ func main() {
 
     // Utility
     cves := cve_regex.FindAllString(data, -1)
-
-    fmt.Println("Hashes: ")
-    fmt.Println("- md5s:" + strings.Join(md5s, ", "))
-    fmt.Println("- sha1s:" + strings.Join(sha1s, ", "))
-    fmt.Println("- sha256s:" + strings.Join(sha256s, ", "))
-    fmt.Println("- sha512s:" + strings.Join(sha512s, ", "))
-    fmt.Println("- ssdeeps:" + strings.Join(ssdeeps, ", "))
-
-    fmt.Println("Network")
-    fmt.Println("- domains:" + strings.Join(domains, ", "))
-    fmt.Println("- emails:" + strings.Join(emails, ", "))
-    fmt.Println("- ipv4s:" + strings.Join(ipv4s, ", "))
-    fmt.Println("- ipv6:" + strings.Join(ipv6s, ", "))
-    fmt.Println("- urls:" + strings.Join(urls, ", "))
 
     c := &CacadorData{md5s, sha1s, sha256s, sha512s, ssdeeps, domains, emails, ipv4s, ipv6s, urls, docs, exes, flashes, imgs, webs, zips, cves}
 
