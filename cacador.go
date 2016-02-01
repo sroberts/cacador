@@ -29,6 +29,7 @@ type CacadorData struct {
     Exes    []string
     Flashes []string
     Imgs    []string
+    Macs    []string
     Webs    []string
     Zips    []string
 
@@ -44,19 +45,20 @@ var sha512_regex = regexp.MustCompile("[A-Fa-f0-9]{128}")
 var ssdeep_regex = regexp.MustCompile("\\d{2}:[A-Za-z0-9/+]{3,}:[A-Za-z0-9/+]{3,}")
 
 // Network
-var domain_regex = regexp.MustCompile("\b[A-za-z]+\\.[a-z]{2,255}(\\.[a-z]{2,255})?\b")
-var email_regex = regexp.MustCompile("\b[A-Za-z0-9_.]+@[0-9a-z.-]+\b")
+var domain_regex = regexp.MustCompile("[A-za-z]+\\.[a-z]{2,255}(\\.[a-z]{2,255})?")
+var email_regex = regexp.MustCompile("[A-Za-z0-9_.]+@[0-9a-z.-]+")
 var ipv4_regex = regexp.MustCompile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\[?\\.\\]?){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)")
 var ipv6_regex = regexp.MustCompile("(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))")
 var url_regex = regexp.MustCompile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
 
 // Files
-var doc_regex = regexp.MustCompile("\b([\\w-]+\\.)(docx|doc|csv|pdf|xlsx|xls|rtf|txt|pptx|ppt)\b")
-var exe_regex = regexp.MustCompile("\b([\\w-]+\\.)(exe|dll|jar)\b")
-var flash_regex = regexp.MustCompile("\b([\\w-]+\\.)(flv|swf)\b")
-var img_regex = regexp.MustCompile("\b([\\w-]+\\.)(jpeg|jpg|gif|png|tiff|bmp)\b")
-var web_regex = regexp.MustCompile("\b([\\w-]+\\.)(html|php|js)\b")
-var zip_regex = regexp.MustCompile("\b([\\w-]+\\.)(zip|zipx|7z|rar|tar|gz)\b")
+var doc_regex = regexp.MustCompile("([\\w-]+\\.)(docx|doc|csv|pdf|xlsx|xls|rtf|txt|pptx|ppt)")
+var exe_regex = regexp.MustCompile("([\\w-]+\\.)(exe|dll|jar)")
+var flash_regex = regexp.MustCompile("([\\w-]+\\.)(flv|swf)")
+var img_regex = regexp.MustCompile("([\\w-]+\\.)(jpeg|jpg|gif|png|tiff|bmp)")
+var mac_regex = regexp.MustCompile("[%A-Za-z\\.\\-\\_\\/ ]+.(plist|app)")
+var web_regex = regexp.MustCompile("([\\w-]+\\.)(html|php|js)")
+var zip_regex = regexp.MustCompile("([\\w-]+\\.)(zip|zipx|7z|rar|tar|gz)")
 
 // Utility
 var cve_regex = regexp.MustCompile("(CVE-(19|20)\\d{2}-\\d{4,7})")
@@ -96,13 +98,14 @@ func main() {
     exes := exe_regex.FindAllString(data, -1)
     flashes := flash_regex.FindAllString(data, -1)
     imgs := img_regex.FindAllString(data, -1)
+    macs := mac_regex.FindAllString(data, -1)
     webs := web_regex.FindAllString(data, -1)
     zips := zip_regex.FindAllString(data, -1)
 
     // Utility
     cves := cve_regex.FindAllString(data, -1)
 
-    c := &CacadorData{md5s, sha1s, sha256s, sha512s, ssdeeps, domains, emails, ipv4s, ipv6s, urls, docs, exes, flashes, imgs, webs, zips, cves}
+    c := &CacadorData{md5s, sha1s, sha256s, sha512s, ssdeeps, domains, emails, ipv4s, ipv6s, urls, docs, exes, flashes, imgs, macs, webs, zips, cves}
 
     b, _ := json.Marshal(c)
 
