@@ -52,13 +52,13 @@ var ipv6_regex = regexp.MustCompile("(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|(
 var url_regex = regexp.MustCompile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
 
 // Files
-var doc_regex = regexp.MustCompile("([\\w-]+\\.)(docx|doc|csv|pdf|xlsx|xls|rtf|txt|pptx|ppt)")
-var exe_regex = regexp.MustCompile("([\\w-]+\\.)(exe|dll|jar)")
-var flash_regex = regexp.MustCompile("([\\w-]+\\.)(flv|swf)")
-var img_regex = regexp.MustCompile("([\\w-]+\\.)(jpeg|jpg|gif|png|tiff|bmp)")
-var mac_regex = regexp.MustCompile("[%A-Za-z\\.\\-\\_\\/ ]+.(plist|app)")
-var web_regex = regexp.MustCompile("([\\w-]+\\.)(html|php|js)")
-var zip_regex = regexp.MustCompile("([\\w-]+\\.)(zip|zipx|7z|rar|tar|gz)")
+var doc_regex = regexp.MustCompile("([\\w-]+)(\\.docx|\\.doc|\\.csv|\\.pdf|\\.xlsx|\\.xls|\\.rtf|\\.txt|\\.pptx|\\.ppt|\\.pages|\\.keynote|\\.numbers)")
+var exe_regex = regexp.MustCompile("([\\w-]+)(\\.exe|\\.dll|\\.jar)")
+var flash_regex = regexp.MustCompile("([\\w-]+)(\\.flv|\\.swf)")
+var img_regex = regexp.MustCompile("([\\w-]+)(\\.jpeg|\\.jpg|\\.gif|\\.png|\\.tiff|\\.bmp)")
+var mac_regex = regexp.MustCompile("[%A-Za-z\\.\\-\\_\\/ ]+(\\.plist|\\.app|\\.pkg)")
+var web_regex = regexp.MustCompile("([\\w-]+)(\\.html|\\.php|\\.js)")
+var zip_regex = regexp.MustCompile("([\\w-]+)(\\.zip|\\.zipx|\\.7z|\\.rar|\\.tar|\\.gz)")
 
 // Utility
 var cve_regex = regexp.MustCompile("(CVE-(19|20)\\d{2}-\\d{4,7})")
