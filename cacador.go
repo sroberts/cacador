@@ -92,6 +92,17 @@ func cleanIpv4(ips []string) []string {
 	return ips
 }
 
+func cleanUrls(urls []string) []string {
+
+	for index, value := range urls {
+		if value[len(value)-1] == ')' {
+			urls[index] = value[:len(value)-1]
+		}
+	}
+
+	return urls
+}
+
 func cleanDomains(domains []string) []string {
 	var cleanDomains []string
 
@@ -140,7 +151,7 @@ func main() {
 	emails := emailRegex.FindAllString(data, -1)
 	ipv4s := cleanIpv4(ipv4Regex.FindAllString(data, -1))
 	ipv6s := ipv6Regex.FindAllString(data, -1)
-	urls := urlRegex.FindAllString(data, -1)
+	urls := cleanUrls(urlRegex.FindAllString(data, -1))
 
 	// Filenames
 	docs := docRegex.FindAllString(data, -1)
