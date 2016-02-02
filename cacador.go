@@ -43,6 +43,9 @@ type cacadordata struct {
 	Time  string
 }
 
+// Blaclists
+var domainBlacklist = []string{"github.com", "www.intego.com", "www.fireeye.com", "www.trendmicro.com", "blog.kaspersky.com", "www.thesafemac.com", "www.virusbtn.com", "www.symantec.com", "www.f-secure.com", "securelist.com"}
+
 // Hashes
 var md5Regex = regexp.MustCompile("[A-Fa-f0-9]{32}")
 var sha1Regex = regexp.MustCompile("[A-Fa-f0-9]{40}")
@@ -51,7 +54,7 @@ var sha512Regex = regexp.MustCompile("[A-Fa-f0-9]{128}")
 var ssdeepRegex = regexp.MustCompile("\\d{2}:[A-Za-z0-9/+]{3,}:[A-Za-z0-9/+]{3,}")
 
 // Network
-var domainRegex = regexp.MustCompile("[A-za-z]+\\.[a-z]{2,255}(\\.[a-z]{2,255})?")
+var domainRegex = regexp.MustCompile("[a-z-]+\\.[a-z-]{2,255}(\\.[a-z]{2,255})?")
 var emailRegex = regexp.MustCompile("[A-Za-z0-9_.]+@[0-9a-z.-]+")
 var ipv4Regex = regexp.MustCompile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\[?\\.\\]?){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)")
 var ipv6Regex = regexp.MustCompile("(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))")
@@ -63,7 +66,7 @@ var exeRegex = regexp.MustCompile("([\\w-]+)(\\.exe|\\.dll|\\.jar)")
 var flashRegex = regexp.MustCompile("([\\w-]+)(\\.flv|\\.swf)")
 var imgRegex = regexp.MustCompile("([\\w-]+)(\\.jpeg|\\.jpg|\\.gif|\\.png|\\.tiff|\\.bmp)")
 var macRegex = regexp.MustCompile("[%A-Za-z\\.\\-\\_\\/ ]+(\\.plist|\\.app|\\.pkg)")
-var webRegex = regexp.MustCompile("([\\w-]+)(\\.html|\\.php|\\.js)")
+var webRegex = regexp.MustCompile("([\\w-]+)(\\.html|\\.php|\\.js|\\.jsp|\\.asp)")
 var zipRegex = regexp.MustCompile("([\\w-]+)(\\.zip|\\.zipx|\\.7z|\\.rar|\\.tar|\\.gz)")
 
 // Utility
@@ -72,12 +75,50 @@ var cveRegex = regexp.MustCompile("(CVE-(19|20)\\d{2}-\\d{4,7})")
 // Snort Signatures
 // Yara Rules
 
+func stringInSlice(element string, list []string) bool {
+	for _, b := range list {
+		if element == b {
+			return true
+		}
+	}
+	return false
+}
+
 func cleanIpv4(ips []string) []string {
 	for index := 0; index < len(ips); index++ {
 		ips[index] = strings.Replace(ips[index], "[", "", -1)
 		ips[index] = strings.Replace(ips[index], "]", "", -1)
 	}
 	return ips
+}
+
+func cleanDomains(domains []string) []string {
+	var cleanDomains []string
+
+	for index := 0; index < len(domains); index++ {
+		if strings.HasPrefix(domains[index], "com.") {
+			continue
+		} else if strings.HasSuffix(domains[index], ".plist") {
+			continue
+		} else if strings.HasSuffix(domains[index], ".tstart") {
+			continue
+		} else if strings.HasSuffix(domains[index], ".app") {
+			continue
+		} else if strings.HasSuffix(domains[index], ".jsp") {
+			continue
+		} else if strings.HasSuffix(domains[index], "html") {
+			continue
+		} else {
+			if stringInSlice(domains[index], cleanDomains) {
+				continue
+			} else {
+				if !stringInSlice(domains[index], domainBlacklist) {
+					cleanDomains = append(cleanDomains, domains[index])
+				}
+			}
+		}
+	}
+	return cleanDomains
 }
 
 func main() {
@@ -97,7 +138,7 @@ func main() {
 	ssdeeps := ssdeepRegex.FindAllString(data, -1)
 
 	// Network
-	domains := domainRegex.FindAllString(data, -1)
+	domains := cleanDomains(domainRegex.FindAllString(data, -1))
 	emails := emailRegex.FindAllString(data, -1)
 	ipv4s := cleanIpv4(ipv4Regex.FindAllString(data, -1))
 	ipv6s := ipv6Regex.FindAllString(data, -1)
