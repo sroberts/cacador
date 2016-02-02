@@ -109,9 +109,7 @@ func cleanDomains(domains []string) []string {
 		} else if strings.HasSuffix(domains[index], "html") {
 			continue
 		} else {
-			if stringInSlice(domains[index], cleanDomains) {
-				continue
-			} else {
+			if !stringInSlice(domains[index], cleanDomains) {
 				if !stringInSlice(domains[index], domainBlacklist) {
 					cleanDomains = append(cleanDomains, domains[index])
 				}
