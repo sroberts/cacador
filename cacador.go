@@ -44,7 +44,7 @@ type cacadordata struct {
 }
 
 // Blaclists
-var domainBlacklist = []string{"github.com", "www.intego.com", "www.fireeye.com", "www.trendmicro.com", "blog.kaspersky.com", "www.thesafemac.com", "www.virusbtn.com", "www.symantec.com", "www.f-secure.com", "securelist.com"}
+var domainBlacklist = []string{"github.com", "intego.com", "fireeye.com", "trendmicro.com", "kaspersky.com", "thesafemac.com", "virusbtn.com", "symantec.com", "f-secure.com", "securelist.com", "microsoft.com"}
 
 // Hashes
 var md5Regex = regexp.MustCompile("[A-Fa-f0-9]{32}")
@@ -121,13 +121,27 @@ func cleanDomains(domains []string) []string {
 			continue
 		} else {
 			if !stringInSlice(domains[index], cleanDomains) {
-				if !stringInSlice(domains[index], domainBlacklist) {
-					cleanDomains = append(cleanDomains, domains[index])
+				for _, v := range domainBlacklist {
+					if !strings.Contains(domains[index], v) {
+						cleanDomains = append(cleanDomains, domains[index])
+					}
 				}
 			}
 		}
 	}
 	return cleanDomains
+}
+
+func dedup(duplist []string) []string {
+	var cleanList []string
+
+	for _, v := range duplist {
+		if !stringInSlice(v, cleanList) {
+			cleanList = append(cleanList, v)
+		}
+	}
+
+	return cleanList
 }
 
 func main() {
@@ -140,27 +154,27 @@ func main() {
 	data := string(bytes)
 
 	// Hashes
-	md5s := md5Regex.FindAllString(data, -1)
-	sha1s := sha1Regex.FindAllString(data, -1)
-	sha256s := sha256Regex.FindAllString(data, -1)
-	sha512s := sha512Regex.FindAllString(data, -1)
-	ssdeeps := ssdeepRegex.FindAllString(data, -1)
+	md5s := dedup(md5Regex.FindAllString(data, -1))
+	sha1s := dedup(sha1Regex.FindAllString(data, -1))
+	sha256s := dedup(sha256Regex.FindAllString(data, -1))
+	sha512s := dedup(sha512Regex.FindAllString(data, -1))
+	ssdeeps := dedup(ssdeepRegex.FindAllString(data, -1))
 
 	// Network
-	domains := cleanDomains(domainRegex.FindAllString(data, -1))
-	emails := emailRegex.FindAllString(data, -1)
-	ipv4s := cleanIpv4(ipv4Regex.FindAllString(data, -1))
-	ipv6s := ipv6Regex.FindAllString(data, -1)
-	urls := cleanUrls(urlRegex.FindAllString(data, -1))
+	domains := dedup(cleanDomains(domainRegex.FindAllString(data, -1)))
+	emails := dedup(emailRegex.FindAllString(data, -1))
+	ipv4s := dedup(cleanIpv4(ipv4Regex.FindAllString(data, -1)))
+	ipv6s := dedup(ipv6Regex.FindAllString(data, -1))
+	urls := dedup(cleanUrls(urlRegex.FindAllString(data, -1)))
 
 	// Filenames
-	docs := docRegex.FindAllString(data, -1)
-	exes := exeRegex.FindAllString(data, -1)
-	flashes := flashRegex.FindAllString(data, -1)
-	imgs := imgRegex.FindAllString(data, -1)
-	macs := macRegex.FindAllString(data, -1)
-	webs := webRegex.FindAllString(data, -1)
-	zips := zipRegex.FindAllString(data, -1)
+	docs := dedup(docRegex.FindAllString(data, -1))
+	exes := dedup(exeRegex.FindAllString(data, -1))
+	flashes := dedup(flashRegex.FindAllString(data, -1))
+	imgs := dedup(imgRegex.FindAllString(data, -1))
+	macs := dedup(macRegex.FindAllString(data, -1))
+	webs := dedup(webRegex.FindAllString(data, -1))
+	zips := dedup(zipRegex.FindAllString(data, -1))
 
 	// Utility
 	cves := cveRegex.FindAllString(data, -1)
