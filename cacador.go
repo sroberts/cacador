@@ -1,110 +1,191 @@
 package main
 
 import (
-    "encoding/json"
-    "fmt"
-    "io/ioutil"
-    "os"
-    "regexp"
-    "strings"
+	"encoding/json"
+	"flag"
+	"fmt"
+	"io/ioutil"
+	"os"
+	"regexp"
+	"strings"
+	"time"
 )
 
-type CacadorData struct {
-    // Hashes
-    Md5s    []string
-    Sha1s   []string
-    Sha256s []string
-    Sha512s []string
-    Ssdeeps []string
+type cacadordata struct {
+	// Hashes
+	Md5s    []string
+	Sha1s   []string
+	Sha256s []string
+	Sha512s []string
+	Ssdeeps []string
 
-    // Network
-    Domains []string
-    Emails  []string
-    Ipv4s   []string
-    Ipv6s   []string
-    Urls    []string
+	// Network
+	Domains []string
+	Emails  []string
+	Ipv4s   []string
+	Ipv6s   []string
+	Urls    []string
 
-    // Files
-    Docs    []string
-    Exes    []string
-    Flashes []string
-    Imgs    []string
-    Webs    []string
-    Zips    []string
+	// Files
+	Docs    []string
+	Exes    []string
+	Flashes []string
+	Imgs    []string
+	Macs    []string
+	Webs    []string
+	Zips    []string
 
-    // Utility
-    Cves    []string
+	// Utility
+	Cves []string
+
+	// Metadata
+	Comments string
+	Tags     []string
+	Time     string
 }
 
+// Blaclists
+var domainBlacklist = []string{"github.com", "intego.com", "fireeye.com", "trendmicro.com", "kaspersky.com", "thesafemac.com", "virusbtn.com", "symantec.com", "f-secure.com", "securelist.com", "microsoft.com", "example.com", "centralops.net", "gmail.com", "twimg.com", "twitter.com", "mandiant.com", "secureworks.com"}
+
 // Hashes
-var md5_regex = regexp.MustCompile("[A-Fa-f0-9]{32}")
-var sha1_regex = regexp.MustCompile("[A-Fa-f0-9]{40}")
-var sha256_regex = regexp.MustCompile("[A-Fa-f0-9]{64}")
-var sha512_regex = regexp.MustCompile("[A-Fa-f0-9]{128}")
-var ssdeep_regex = regexp.MustCompile("\\d{2}:[A-Za-z0-9/+]{3,}:[A-Za-z0-9/+]{3,}")
+var md5Regex = regexp.MustCompile("[A-Fa-f0-9]{32}")
+var sha1Regex = regexp.MustCompile("[A-Fa-f0-9]{40}")
+var sha256Regex = regexp.MustCompile("[A-Fa-f0-9]{64}")
+var sha512Regex = regexp.MustCompile("[A-Fa-f0-9]{128}")
+var ssdeepRegex = regexp.MustCompile("\\d{2}:[A-Za-z0-9/+]{3,}:[A-Za-z0-9/+]{3,}")
 
 // Network
-var domain_regex = regexp.MustCompile("\b[A-za-z]+\\.[a-z]{2,255}(\\.[a-z]{2,255})?\b")
-var email_regex = regexp.MustCompile("\b[A-Za-z0-9_.]+@[0-9a-z.-]+\b")
-var ipv4_regex = regexp.MustCompile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\[?\\.\\]?){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)")
-var ipv6_regex = regexp.MustCompile("(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))")
-var url_regex = regexp.MustCompile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
+var domainRegex = regexp.MustCompile("[0-9a-z-]+\\.[0-0a-z-]{2,255}(\\.[a-z]{2,255})?")
+var emailRegex = regexp.MustCompile("[A-Za-z0-9_.]+@[0-9a-z.-]+")
+var ipv4Regex = regexp.MustCompile("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\[?\\.\\]?){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)")
+var ipv6Regex = regexp.MustCompile("(([0-9a-fA-F]{1,4}:){7,7}[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,7}:|([0-9a-fA-F]{1,4}:){1,6}:[0-9a-fA-F]{1,4}|([0-9a-fA-F]{1,4}:){1,5}(:[0-9a-fA-F]{1,4}){1,2}|([0-9a-fA-F]{1,4}:){1,4}(:[0-9a-fA-F]{1,4}){1,3}|([0-9a-fA-F]{1,4}:){1,3}(:[0-9a-fA-F]{1,4}){1,4}|([0-9a-fA-F]{1,4}:){1,2}(:[0-9a-fA-F]{1,4}){1,5}|[0-9a-fA-F]{1,4}:((:[0-9a-fA-F]{1,4}){1,6})|:((:[0-9a-fA-F]{1,4}){1,7}|:)|fe80:(:[0-9a-fA-F]{0,4}){0,4}%[0-9a-zA-Z]{1,}|::(ffff(:0{1,4}){0,1}:){0,1}((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])|([0-9a-fA-F]{1,4}:){1,4}:((25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9])\\.){3,3}(25[0-5]|(2[0-4]|1{0,1}[0-9]){0,1}[0-9]))")
+var urlRegex = regexp.MustCompile("http[s]?://(?:[a-zA-Z]|[0-9]|[$-_@.&+]|[!*\\(\\),]|(?:%[0-9a-fA-F][0-9a-fA-F]))+")
 
 // Files
-var doc_regex = regexp.MustCompile("\b([\\w-]+\\.)(docx|doc|csv|pdf|xlsx|xls|rtf|txt|pptx|ppt)\b")
-var exe_regex = regexp.MustCompile("\b([\\w-]+\\.)(exe|dll|jar)\b")
-var flash_regex = regexp.MustCompile("\b([\\w-]+\\.)(flv|swf)\b")
-var img_regex = regexp.MustCompile("\b([\\w-]+\\.)(jpeg|jpg|gif|png|tiff|bmp)\b")
-var web_regex = regexp.MustCompile("\b([\\w-]+\\.)(html|php|js)\b")
-var zip_regex = regexp.MustCompile("\b([\\w-]+\\.)(zip|zipx|7z|rar|tar|gz)\b")
+var docRegex = regexp.MustCompile("([\\w-]+)(\\.docx|\\.doc|\\.csv|\\.pdf|\\.xlsx|\\.xls|\\.rtf|\\.txt|\\.pptx|\\.ppt|\\.pages|\\.keynote|\\.numbers)")
+var exeRegex = regexp.MustCompile("([\\w-]+)(\\.exe|\\.dll|\\.jar)")
+var flashRegex = regexp.MustCompile("([\\w-]+)(\\.flv|\\.swf)")
+var imgRegex = regexp.MustCompile("([\\w-]+)(\\.jpeg|\\.jpg|\\.gif|\\.png|\\.tiff|\\.bmp)")
+var macRegex = regexp.MustCompile("[%A-Za-z\\.\\-\\_\\/ ]+(\\.plist|\\.app|\\.pkg)")
+var webRegex = regexp.MustCompile("([\\w-]+)(\\.html|\\.php|\\.js|\\.jsp|\\.asp)")
+var zipRegex = regexp.MustCompile("([\\w-]+)(\\.zip|\\.zipx|\\.7z|\\.rar|\\.tar|\\.gz)")
 
 // Utility
-var cve_regex = regexp.MustCompile("(CVE-(19|20)\\d{2}-\\d{4,7})")
+var cveRegex = regexp.MustCompile("(CVE-(19|20)\\d{2}-\\d{4,7})")
+
 // Snort Signatures
 // Yara Rules
 
-func clean_ipv4(ips []string) []string {
-    for index := 0; index < len(ips); index++ {
-        ips[index] = strings.Replace(ips[index], "[", "", -1)
-        ips[index] = strings.Replace(ips[index], "]", "", -1)
-    }
-    return ips
+func stringInSlice(element string, list []string) bool {
+	for _, b := range list {
+		if element == b {
+			return true
+		}
+	}
+	return false
+}
+
+func cleanIpv4(ips []string) []string {
+	for index := 0; index < len(ips); index++ {
+		ips[index] = strings.Replace(ips[index], "[", "", -1)
+		ips[index] = strings.Replace(ips[index], "]", "", -1)
+	}
+	return ips
+}
+
+func cleanUrls(urls []string) []string {
+
+	for index, value := range urls {
+		if value[len(value)-1] == ')' {
+			urls[index] = value[:len(value)-1]
+		}
+	}
+
+	return urls
+}
+
+func cleanDomains(domains []string) []string {
+	var cleanDomains []string
+
+	for index := 0; index < len(domains); index++ {
+		if strings.HasPrefix(domains[index], "com.") {
+			continue
+		} else if strings.HasSuffix(domains[index], ".plist") {
+			continue
+		} else if strings.HasSuffix(domains[index], ".tstart") {
+			continue
+		} else if strings.HasSuffix(domains[index], ".app") {
+			continue
+		} else if strings.HasSuffix(domains[index], ".jsp") {
+			continue
+		} else if strings.HasSuffix(domains[index], "html") {
+			continue
+		} else {
+			if !stringInSlice(domains[index], cleanDomains) {
+				for _, v := range domainBlacklist {
+					if !strings.Contains(domains[index], v) {
+						cleanDomains = append(cleanDomains, domains[index])
+					}
+				}
+			}
+		}
+	}
+	return cleanDomains
+}
+
+func dedup(duplist []string) []string {
+	var cleanList []string
+
+	for _, v := range duplist {
+		if !stringInSlice(v, cleanList) {
+			cleanList = append(cleanList, v)
+		}
+	}
+
+	return cleanList
 }
 
 func main() {
 
-    // Get Data from STDIN
-    bytes, _ := ioutil.ReadAll(os.Stdin)
-    data := string(bytes)
+	comments := flag.String("comment", "Automatically imported.", "Adds a note to the export.")
+	tags := flag.String("tags", "", "Adds a list of tags to the export (comma seperated).")
+	flag.Parse()
 
-    // Hashes
-    md5s := md5_regex.FindAllString(data, -1)
-    sha1s := sha1_regex.FindAllString(data, -1)
-    sha256s := sha256_regex.FindAllString(data, -1)
-    sha512s := sha512_regex.FindAllString(data, -1)
-    ssdeeps := ssdeep_regex.FindAllString(data, -1)
+	tagslist := strings.Split(*tags, ",")
 
-    // Network
-    domains := domain_regex.FindAllString(data, -1)
-    emails := email_regex.FindAllString(data, -1)
-    ipv4s := clean_ipv4(ipv4_regex.FindAllString(data, -1))
-    ipv6s := ipv6_regex.FindAllString(data, -1)
-    urls := url_regex.FindAllString(data, -1)
+	// Get Data from STDIN
+	bytes, _ := ioutil.ReadAll(os.Stdin)
+	data := string(bytes)
 
-    // Filenames
-    docs := doc_regex.FindAllString(data, -1)
-    exes := exe_regex.FindAllString(data, -1)
-    flashes := flash_regex.FindAllString(data, -1)
-    imgs := img_regex.FindAllString(data, -1)
-    webs := web_regex.FindAllString(data, -1)
-    zips := zip_regex.FindAllString(data, -1)
+	// Hashes
+	md5s := dedup(md5Regex.FindAllString(data, -1))
+	sha1s := dedup(sha1Regex.FindAllString(data, -1))
+	sha256s := dedup(sha256Regex.FindAllString(data, -1))
+	sha512s := dedup(sha512Regex.FindAllString(data, -1))
+	ssdeeps := dedup(ssdeepRegex.FindAllString(data, -1))
 
-    // Utility
-    cves := cve_regex.FindAllString(data, -1)
+	// Network
+	domains := dedup(cleanDomains(domainRegex.FindAllString(data, -1)))
+	emails := dedup(emailRegex.FindAllString(data, -1))
+	ipv4s := dedup(cleanIpv4(ipv4Regex.FindAllString(data, -1)))
+	ipv6s := dedup(ipv6Regex.FindAllString(data, -1))
+	urls := dedup(cleanUrls(urlRegex.FindAllString(data, -1)))
 
-    c := &CacadorData{md5s, sha1s, sha256s, sha512s, ssdeeps, domains, emails, ipv4s, ipv6s, urls, docs, exes, flashes, imgs, webs, zips, cves}
+	// Filenames
+	docs := dedup(docRegex.FindAllString(data, -1))
+	exes := dedup(exeRegex.FindAllString(data, -1))
+	flashes := dedup(flashRegex.FindAllString(data, -1))
+	imgs := dedup(imgRegex.FindAllString(data, -1))
+	macs := dedup(macRegex.FindAllString(data, -1))
+	webs := dedup(webRegex.FindAllString(data, -1))
+	zips := dedup(zipRegex.FindAllString(data, -1))
 
-    b, _ := json.Marshal(c)
+	// Utility
+	cves := cveRegex.FindAllString(data, -1)
 
-    fmt.Println(string(b))
+	c := &cacadordata{md5s, sha1s, sha256s, sha512s, ssdeeps, domains, emails, ipv4s, ipv6s, urls, docs, exes, flashes, imgs, macs, webs, zips, cves, *comments, tagslist, time.Now().String()}
+
+	b, _ := json.Marshal(c)
+
+	fmt.Println(string(b))
 }
