@@ -45,7 +45,7 @@ type cacadordata struct {
 }
 
 // Blaclists
-var domainBlacklist = []string{"github.com", "intego.com", "fireeye.com", "trendmicro.com", "kaspersky.com", "thesafemac.com", "virusbtn.com", "symantec.com", "f-secure.com", "securelist.com", "microsoft.com", "example.com", "centralops.net", "gmail.com", "twimg.com", "twitter.com", "mandiant.com", "secureworks.com"}
+var domainBlacklist = []string{"github.com", "intego.com", "fireeye.com", "trendmicro.com", "kaspersky.com", "thesafemac.com", "virusbtn.com", "symantec.com", "f-secure.com", "securelist.com", "microsoft.com", "example.com", "centralops.net", "gmail.com", "twimg.com", "twitter.com", "mandiant.com", "secureworks.com", "com.", ".plist", ".tstart", ".app", ".jsp", ".html"}
 
 // Hashes
 var md5Regex = regexp.MustCompile("[A-Fa-f0-9]{32}")
@@ -108,41 +108,15 @@ func cleanDomains(domains []string) []string {
 	var cleanDomains []string
 
 	for index := 0; index < len(domains); index++ {
-		if strings.HasPrefix(domains[index], "com.") {
-			continue
-		} else if strings.HasSuffix(domains[index], ".plist") {
-			continue
-		} else if strings.HasSuffix(domains[index], ".tstart") {
-			continue
-		} else if strings.HasSuffix(domains[index], ".app") {
-			continue
-		} else if strings.HasSuffix(domains[index], ".jsp") {
-			continue
-		} else if strings.HasSuffix(domains[index], "html") {
-			continue
-		} else {
-			if !stringInSlice(domains[index], cleanDomains) {
-				for _, v := range domainBlacklist {
-					if !strings.Contains(domains[index], v) {
-						cleanDomains = append(cleanDomains, domains[index])
-					}
+		if !stringInSlice(domains[index], cleanDomains) {
+			for _, v := range domainBlacklist {
+				if !strings.Contains(domains[index], v) {
+					cleanDomains = append(cleanDomains, domains[index])
 				}
 			}
 		}
 	}
 	return cleanDomains
-}
-
-func dedup(duplist []string) []string {
-	var cleanList []string
-
-	for _, v := range duplist {
-		if !stringInSlice(v, cleanList) {
-			cleanList = append(cleanList, v)
-		}
-	}
-
-	return cleanList
 }
 
 func main() {
@@ -158,27 +132,27 @@ func main() {
 	data := string(bytes)
 
 	// Hashes
-	md5s := dedup(md5Regex.FindAllString(data, -1))
-	sha1s := dedup(sha1Regex.FindAllString(data, -1))
-	sha256s := dedup(sha256Regex.FindAllString(data, -1))
-	sha512s := dedup(sha512Regex.FindAllString(data, -1))
-	ssdeeps := dedup(ssdeepRegex.FindAllString(data, -1))
+	md5s := Dedup(md5Regex.FindAllString(data, -1))
+	sha1s := Dedup(sha1Regex.FindAllString(data, -1))
+	sha256s := Dedup(sha256Regex.FindAllString(data, -1))
+	sha512s := Dedup(sha512Regex.FindAllString(data, -1))
+	ssdeeps := Dedup(ssdeepRegex.FindAllString(data, -1))
 
 	// Network
-	domains := dedup(cleanDomains(domainRegex.FindAllString(data, -1)))
-	emails := dedup(emailRegex.FindAllString(data, -1))
-	ipv4s := dedup(cleanIpv4(ipv4Regex.FindAllString(data, -1)))
-	ipv6s := dedup(ipv6Regex.FindAllString(data, -1))
-	urls := dedup(cleanUrls(urlRegex.FindAllString(data, -1)))
+	domains := Dedup(cleanDomains(domainRegex.FindAllString(data, -1)))
+	emails := Dedup(emailRegex.FindAllString(data, -1))
+	ipv4s := Dedup(cleanIpv4(ipv4Regex.FindAllString(data, -1)))
+	ipv6s := Dedup(ipv6Regex.FindAllString(data, -1))
+	urls := Dedup(cleanUrls(urlRegex.FindAllString(data, -1)))
 
 	// Filenames
-	docs := dedup(docRegex.FindAllString(data, -1))
-	exes := dedup(exeRegex.FindAllString(data, -1))
-	flashes := dedup(flashRegex.FindAllString(data, -1))
-	imgs := dedup(imgRegex.FindAllString(data, -1))
-	macs := dedup(macRegex.FindAllString(data, -1))
-	webs := dedup(webRegex.FindAllString(data, -1))
-	zips := dedup(zipRegex.FindAllString(data, -1))
+	docs := Dedup(docRegex.FindAllString(data, -1))
+	exes := Dedup(exeRegex.FindAllString(data, -1))
+	flashes := Dedup(flashRegex.FindAllString(data, -1))
+	imgs := Dedup(imgRegex.FindAllString(data, -1))
+	macs := Dedup(macRegex.FindAllString(data, -1))
+	webs := Dedup(webRegex.FindAllString(data, -1))
+	zips := Dedup(zipRegex.FindAllString(data, -1))
 
 	// Utility
 	cves := cveRegex.FindAllString(data, -1)
