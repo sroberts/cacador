@@ -7,6 +7,7 @@ Cacador (Portugese for hunter) is tool for extracting common [indicators of comp
 ## Compiling & Running
 
 - Install golang
+- `go get github.com/sroberts/cacador`
 - Compile with `go build cacador.go`
 - Run with `./cacador`. It accepts text from stdin and writes a JSON blob of IOCs to stdout. For example `cat text.txt | ./cacador | import` where text is some IOC rich text and import pushes your new IOCs into your threat management system.
 
