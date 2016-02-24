@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
+	"github.com/sroberts/cacador/cacador"
 	"io/ioutil"
 	"os"
 	"regexp"
@@ -53,15 +54,6 @@ var cveRegex = regexp.MustCompile("(CVE-(19|20)\\d{2}-\\d{4,7})")
 // Snort Signatures
 // Yara Rules
 
-func stringInSlice(element string, list []string) bool {
-	for _, b := range list {
-		if element == b {
-			return true
-		}
-	}
-	return false
-}
-
 func cleanIpv4(ips []string) []string {
 	for index := 0; index < len(ips); index++ {
 		ips[index] = strings.Replace(ips[index], "[", "", -1)
@@ -85,7 +77,7 @@ func cleanDomains(domains []string) []string {
 	var cleanDomains []string
 
 	for index := 0; index < len(domains); index++ {
-		if !stringInSlice(domains[index], cleanDomains) {
+		if !cacador.StringInSlice(domains[index], cleanDomains) {
 			for _, v := range domainBlacklist {
 				if !strings.Contains(domains[index], v) {
 					cleanDomains = append(cleanDomains, domains[index])
@@ -100,11 +92,11 @@ func getHashStrings(data string) map[string][]string {
 
 	h := make(map[string][]string)
 
-	h["md5s"] = Dedup(md5Regex.FindAllString(data, -1))
-	h["sha1s"] = Dedup(sha1Regex.FindAllString(data, -1))
-	h["sha256s"] = Dedup(sha256Regex.FindAllString(data, -1))
-	h["sha512s"] = Dedup(sha512Regex.FindAllString(data, -1))
-	h["ssdeeps"] = Dedup(ssdeepRegex.FindAllString(data, -1))
+	h["md5s"] = cacador.Dedup(md5Regex.FindAllString(data, -1))
+	h["sha1s"] = cacador.Dedup(sha1Regex.FindAllString(data, -1))
+	h["sha256s"] = cacador.Dedup(sha256Regex.FindAllString(data, -1))
+	h["sha512s"] = cacador.Dedup(sha512Regex.FindAllString(data, -1))
+	h["ssdeeps"] = cacador.Dedup(ssdeepRegex.FindAllString(data, -1))
 
 	return h
 }
@@ -113,11 +105,11 @@ func getNetworkStrings(data string) map[string][]string {
 
 	n := make(map[string][]string)
 
-	n["domains"] = Dedup(cleanDomains(domainRegex.FindAllString(data, -1)))
-	n["emails"] = Dedup(emailRegex.FindAllString(data, -1))
-	n["ipv4s"] = Dedup(cleanIpv4(ipv4Regex.FindAllString(data, -1)))
-	n["ipv6s"] = Dedup(ipv6Regex.FindAllString(data, -1))
-	n["urls"] = Dedup(cleanUrls(urlRegex.FindAllString(data, -1)))
+	n["domains"] = cacador.Dedup(cleanDomains(domainRegex.FindAllString(data, -1)))
+	n["emails"] = cacador.Dedup(emailRegex.FindAllString(data, -1))
+	n["ipv4s"] = cacador.Dedup(cleanIpv4(ipv4Regex.FindAllString(data, -1)))
+	n["ipv6s"] = cacador.Dedup(ipv6Regex.FindAllString(data, -1))
+	n["urls"] = cacador.Dedup(cleanUrls(urlRegex.FindAllString(data, -1)))
 
 	return n
 }
@@ -126,13 +118,13 @@ func getFilenameStrings(data string) map[string][]string {
 
 	f := make(map[string][]string)
 
-	f["docs"] = Dedup(docRegex.FindAllString(data, -1))
-	f["exes"] = Dedup(exeRegex.FindAllString(data, -1))
-	f["flashes"] = Dedup(flashRegex.FindAllString(data, -1))
-	f["imgs"] = Dedup(imgRegex.FindAllString(data, -1))
-	f["macs"] = Dedup(macRegex.FindAllString(data, -1))
-	f["webs"] = Dedup(webRegex.FindAllString(data, -1))
-	f["zips"] = Dedup(zipRegex.FindAllString(data, -1))
+	f["docs"] = cacador.Dedup(docRegex.FindAllString(data, -1))
+	f["exes"] = cacador.Dedup(exeRegex.FindAllString(data, -1))
+	f["flashes"] = cacador.Dedup(flashRegex.FindAllString(data, -1))
+	f["imgs"] = cacador.Dedup(imgRegex.FindAllString(data, -1))
+	f["macs"] = cacador.Dedup(macRegex.FindAllString(data, -1))
+	f["webs"] = cacador.Dedup(webRegex.FindAllString(data, -1))
+	f["zips"] = cacador.Dedup(zipRegex.FindAllString(data, -1))
 
 	return f
 }
@@ -141,7 +133,7 @@ func getUtilityStrings(data string) map[string][]string {
 
 	u := make(map[string][]string)
 
-	u["cves"] = Dedup(cveRegex.FindAllString(data, -1))
+	u["cves"] = cacador.Dedup(cveRegex.FindAllString(data, -1))
 
 	return u
 }
