@@ -12,33 +12,10 @@ import (
 )
 
 type cacadordata struct {
-	// Hashes
-	Md5s    []string
-	Sha1s   []string
-	Sha256s []string
-	Sha512s []string
-	Ssdeeps []string
-
-	// Network
-	Domains []string
-	Emails  []string
-	Ipv4s   []string
-	Ipv6s   []string
-	Urls    []string
-
-	// Files
-	Docs    []string
-	Exes    []string
-	Flashes []string
-	Imgs    []string
-	Macs    []string
-	Webs    []string
-	Zips    []string
-
-	// Utility
-	Cves []string
-
-	// Metadata
+	Hashes   map[string][]string
+	Networks map[string][]string
+	Files    map[string][]string
+	Utility  map[string][]string
 	Comments string
 	Tags     []string
 	Time     string
@@ -119,6 +96,56 @@ func cleanDomains(domains []string) []string {
 	return cleanDomains
 }
 
+func getHashStrings(data string) map[string][]string {
+
+	h := make(map[string][]string)
+
+	h["md5s"] = Dedup(md5Regex.FindAllString(data, -1))
+	h["sha1s"] = Dedup(sha1Regex.FindAllString(data, -1))
+	h["sha256s"] = Dedup(sha256Regex.FindAllString(data, -1))
+	h["sha512s"] = Dedup(sha512Regex.FindAllString(data, -1))
+	h["ssdeeps"] = Dedup(ssdeepRegex.FindAllString(data, -1))
+
+	return h
+}
+
+func getNetworkStrings(data string) map[string][]string {
+
+	n := make(map[string][]string)
+
+	n["domains"] = Dedup(cleanDomains(domainRegex.FindAllString(data, -1)))
+	n["emails"] = Dedup(emailRegex.FindAllString(data, -1))
+	n["ipv4s"] = Dedup(cleanIpv4(ipv4Regex.FindAllString(data, -1)))
+	n["ipv6s"] = Dedup(ipv6Regex.FindAllString(data, -1))
+	n["urls"] = Dedup(cleanUrls(urlRegex.FindAllString(data, -1)))
+
+	return n
+}
+
+func getFilenameStrings(data string) map[string][]string {
+
+	f := make(map[string][]string)
+
+	f["docs"] = Dedup(docRegex.FindAllString(data, -1))
+	f["exes"] = Dedup(exeRegex.FindAllString(data, -1))
+	f["flashes"] = Dedup(flashRegex.FindAllString(data, -1))
+	f["imgs"] = Dedup(imgRegex.FindAllString(data, -1))
+	f["macs"] = Dedup(macRegex.FindAllString(data, -1))
+	f["webs"] = Dedup(webRegex.FindAllString(data, -1))
+	f["zips"] = Dedup(zipRegex.FindAllString(data, -1))
+
+	return f
+}
+
+func getUtilityStrings(data string) map[string][]string {
+
+	u := make(map[string][]string)
+
+	u["cves"] = Dedup(cveRegex.FindAllString(data, -1))
+
+	return u
+}
+
 func main() {
 
 	comments := flag.String("comment", "Automatically imported.", "Adds a note to the export.")
@@ -131,33 +158,16 @@ func main() {
 	bytes, _ := ioutil.ReadAll(os.Stdin)
 	data := string(bytes)
 
-	// Hashes
-	md5s := Dedup(md5Regex.FindAllString(data, -1))
-	sha1s := Dedup(sha1Regex.FindAllString(data, -1))
-	sha256s := Dedup(sha256Regex.FindAllString(data, -1))
-	sha512s := Dedup(sha512Regex.FindAllString(data, -1))
-	ssdeeps := Dedup(ssdeepRegex.FindAllString(data, -1))
+	// c := &cacadordata{}
+	c := cacadordata{}
 
-	// Network
-	domains := Dedup(cleanDomains(domainRegex.FindAllString(data, -1)))
-	emails := Dedup(emailRegex.FindAllString(data, -1))
-	ipv4s := Dedup(cleanIpv4(ipv4Regex.FindAllString(data, -1)))
-	ipv6s := Dedup(ipv6Regex.FindAllString(data, -1))
-	urls := Dedup(cleanUrls(urlRegex.FindAllString(data, -1)))
-
-	// Filenames
-	docs := Dedup(docRegex.FindAllString(data, -1))
-	exes := Dedup(exeRegex.FindAllString(data, -1))
-	flashes := Dedup(flashRegex.FindAllString(data, -1))
-	imgs := Dedup(imgRegex.FindAllString(data, -1))
-	macs := Dedup(macRegex.FindAllString(data, -1))
-	webs := Dedup(webRegex.FindAllString(data, -1))
-	zips := Dedup(zipRegex.FindAllString(data, -1))
-
-	// Utility
-	cves := cveRegex.FindAllString(data, -1)
-
-	c := &cacadordata{md5s, sha1s, sha256s, sha512s, ssdeeps, domains, emails, ipv4s, ipv6s, urls, docs, exes, flashes, imgs, macs, webs, zips, cves, *comments, tagslist, time.Now().String()}
+	c.Hashes = getHashStrings(data)
+	c.Networks = getNetworkStrings(data)
+	c.Files = getFilenameStrings(data)
+	c.Utility = getUtilityStrings(data)
+	c.Comments = *comments
+	c.Tags = tagslist
+	c.Time = time.Now().String()
 
 	b, _ := json.Marshal(c)
 
