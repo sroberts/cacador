@@ -20,12 +20,6 @@ type cacadordata struct {
 	Time     string
 }
 
-// Blaclists
-var domainBlacklist = []string{"github.com", "intego.com", "fireeye.com", "trendmicro.com", "kaspersky.com", "thesafemac.com", "virusbtn.com", "symantec.com", "f-secure.com", "securelist.com", "microsoft.com", "example.com", "centralops.net", "gmail.com", "twimg.com", "twitter.com", "mandiant.com", "secureworks.com", "com.", ".plist", ".tstart", ".app", ".jsp", ".html"}
-
-// Snort Signatures
-// Yara Rules
-
 func getHashStrings(data string) map[string][]string {
 
 	h := make(map[string][]string)
@@ -62,7 +56,7 @@ func getFilenameStrings(data string) map[string][]string {
 	f["imgs"] = dedup(imgRegex.FindAllString(data, -1))
 	f["macs"] = dedup(macRegex.FindAllString(data, -1))
 	f["webs"] = dedup(webRegex.FindAllString(data, -1))
-	f["zips"] = dedup(zipRegex.FindAllString(data, -1))
+	f["zips"] = dedup(zipRegexs.FindAllString(data, -1))
 
 	return f
 }
@@ -87,8 +81,6 @@ func main() {
 	// Get Data from STDIN
 	bytes, _ := ioutil.ReadAll(os.Stdin)
 	data := string(bytes)
-
-	// c := &cacadordata{}
 	c := cacadordata{}
 
 	c.Hashes = getHashStrings(data)

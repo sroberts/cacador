@@ -16,4 +16,4 @@ Cacador does recognize two command line flags:
 
 ## Why?
 
-There are other tools for doing indicator extraction, but what's nice about cacador is you can compile it and put it in your path and use it for Unix style workflows with pipes and things. Also it's super fast and was a good excuse to learn [Go](http://golang.org).
+Other tools for doing indicator extraction are pretty awesome (like ioc-extractor), but what's nice about cacador is you can compile it and put it in your path and use it for Unix style workflows with pipes and things. Also it's super fast and was a good excuse to learn [Go](http://golang.org).
