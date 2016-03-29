@@ -14,7 +14,7 @@ func stringInSlice(element string, list []string) bool {
 	return false
 }
 
-//Dedup removes duplicate items from an array of strings
+//Dedup removes duplicate items from an array of strings and fixes empty arrays
 func dedup(duplist []string) []string {
 	var cleanList []string
 
@@ -22,6 +22,10 @@ func dedup(duplist []string) []string {
 		if !stringInSlice(v, cleanList) {
 			cleanList = append(cleanList, v)
 		}
+	}
+
+	if cleanList == nil {
+		cleanList = []string{}
 	}
 
 	return cleanList
