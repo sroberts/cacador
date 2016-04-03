@@ -112,7 +112,7 @@ func main() {
 	flag.Parse()
 
 	if *version {
-		fmt.Println(cacadorversion)
+		fmt.Println("cacador version " + cacadorversion)
 		os.Exit(0)
 	}
 
