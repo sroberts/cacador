@@ -8,7 +8,11 @@ import (
 	"os"
 	"strings"
 	"time"
+
+	"github.com/sroberts/cacador/aux"
 )
+
+var cacadorversion = "0.0.1"
 
 type hashes struct {
 	Md5s    []string `json:"md5s"`
@@ -54,11 +58,11 @@ func getHashStrings(data string) hashes {
 
 	h := hashes{}
 
-	h.Md5s = dedup(md5Regex.FindAllString(data, -1))
-	h.Sha1s = dedup(sha1Regex.FindAllString(data, -1))
-	h.Sha256s = dedup(sha256Regex.FindAllString(data, -1))
-	h.Sha512s = dedup(sha512Regex.FindAllString(data, -1))
-	h.Ssdeeps = dedup(ssdeepRegex.FindAllString(data, -1))
+	h.Md5s = aux.Dedup(aux.HashRegexs["md5"].FindAllString(data, -1))
+	h.Sha1s = aux.Dedup(aux.HashRegexs["sha1"].FindAllString(data, -1))
+	h.Sha256s = aux.Dedup(aux.HashRegexs["sha256"].FindAllString(data, -1))
+	h.Sha512s = aux.Dedup(aux.HashRegexs["sha512"].FindAllString(data, -1))
+	h.Ssdeeps = aux.Dedup(aux.HashRegexs["ssdeep"].FindAllString(data, -1))
 
 	return h
 }
@@ -67,11 +71,11 @@ func getNetworkStrings(data string) networks {
 
 	n := networks{}
 
-	n.Domains = dedup(cleanDomains(domainRegex.FindAllString(data, -1)))
-	n.Emails = dedup(emailRegex.FindAllString(data, -1))
-	n.Ipv4s = dedup(cleanIpv4(ipv4Regex.FindAllString(data, -1)))
-	n.Ipv6s = dedup(ipv6Regex.FindAllString(data, -1))
-	n.Urls = dedup(cleanUrls(urlRegex.FindAllString(data, -1)))
+	n.Domains = aux.Dedup(aux.CleanDomains(aux.NetworkRegexs["domain"].FindAllString(data, -1)))
+	n.Emails = aux.Dedup(aux.NetworkRegexs["email"].FindAllString(data, -1))
+	n.Ipv4s = aux.Dedup(aux.CleanIpv4(aux.NetworkRegexs["ipv4"].FindAllString(data, -1)))
+	n.Ipv6s = aux.Dedup(aux.NetworkRegexs["ipv6"].FindAllString(data, -1))
+	n.Urls = aux.Dedup(aux.CleanUrls(aux.NetworkRegexs["url"].FindAllString(data, -1)))
 
 	return n
 }
@@ -80,13 +84,13 @@ func getFilenameStrings(data string) files {
 
 	f := files{}
 
-	f.Docs = dedup(docRegex.FindAllString(data, -1))
-	f.Exes = dedup(exeRegex.FindAllString(data, -1))
-	f.Flashes = dedup(flashRegex.FindAllString(data, -1))
-	f.Imgs = dedup(imgRegex.FindAllString(data, -1))
-	f.Macs = dedup(macRegex.FindAllString(data, -1))
-	f.Webs = dedup(webRegex.FindAllString(data, -1))
-	f.Zips = dedup(zipRegexs.FindAllString(data, -1))
+	f.Docs = aux.Dedup(aux.FileRegexs["doc"].FindAllString(data, -1))
+	f.Exes = aux.Dedup(aux.FileRegexs["exe"].FindAllString(data, -1))
+	f.Flashes = aux.Dedup(aux.FileRegexs["flash"].FindAllString(data, -1))
+	f.Imgs = aux.Dedup(aux.FileRegexs["img"].FindAllString(data, -1))
+	f.Macs = aux.Dedup(aux.FileRegexs["mac"].FindAllString(data, -1))
+	f.Webs = aux.Dedup(aux.FileRegexs["web"].FindAllString(data, -1))
+	f.Zips = aux.Dedup(aux.FileRegexs["zip"].FindAllString(data, -1))
 
 	return f
 }
@@ -95,7 +99,7 @@ func getUtilityStrings(data string) utilities {
 
 	u := utilities{}
 
-	u.Cves = dedup(cveRegex.FindAllString(data, -1))
+	u.Cves = aux.Dedup(aux.UtilityRegexs["cve"].FindAllString(data, -1))
 
 	return u
 }
@@ -104,7 +108,13 @@ func main() {
 
 	comments := flag.String("comment", "Automatically imported.", "Adds a note to the export.")
 	tags := flag.String("tags", "", "Adds a list of tags to the export (comma seperated).")
+	version := flag.Bool("version", false, "Returns the current version of Cacador.")
 	flag.Parse()
+
+	if *version {
+		fmt.Println("cacador version " + cacadorversion)
+		os.Exit(0)
+	}
 
 	tagslist := strings.Split(*tags, ",")
 
@@ -125,4 +135,6 @@ func main() {
 	b, _ := json.Marshal(c)
 
 	fmt.Println(string(b))
+
+	os.Exit(0)
 }
