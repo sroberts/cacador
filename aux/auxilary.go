@@ -1,11 +1,11 @@
-package main
+package aux
 
 import (
 	"strings"
 )
 
 //StringInSlice identifies if a string is in a slice
-func stringInSlice(element string, list []string) bool {
+func StringInSlice(element string, list []string) bool {
 	for _, b := range list {
 		if element == b {
 			return true
@@ -15,11 +15,11 @@ func stringInSlice(element string, list []string) bool {
 }
 
 //Dedup removes duplicate items from an array of strings and fixes empty arrays
-func dedup(duplist []string) []string {
+func Dedup(duplist []string) []string {
 	var cleanList []string
 
 	for _, v := range duplist {
-		if !stringInSlice(v, cleanList) {
+		if !StringInSlice(v, cleanList) {
 			cleanList = append(cleanList, v)
 		}
 	}
@@ -31,15 +31,17 @@ func dedup(duplist []string) []string {
 	return cleanList
 }
 
-func cleanIpv4(ips []string) []string {
+// CleanIpv4 removes defanged ipv4 addresses
+func CleanIpv4(ips []string) []string {
 	for index := 0; index < len(ips); index++ {
 		ips[index] = strings.Replace(ips[index], "[", "", -1)
 		ips[index] = strings.Replace(ips[index], "]", "", -1)
 	}
-	return dedup(ips)
+	return Dedup(ips)
 }
 
-func cleanUrls(urls []string) []string {
+// CleanUrls removes bad url values
+func CleanUrls(urls []string) []string {
 
 	for index, value := range urls {
 		if value[len(value)-1] == ')' {
@@ -47,14 +49,15 @@ func cleanUrls(urls []string) []string {
 		}
 	}
 
-	return dedup(urls)
+	return Dedup(urls)
 }
 
-func cleanDomains(domains []string) []string {
+// CleanDomains checks domains against blacklist to ensure low false positives
+func CleanDomains(domains []string) []string {
 	var cleanDomains []string
 
 	for index := 0; index < len(domains); index++ {
-		if !stringInSlice(domains[index], cleanDomains) {
+		if !StringInSlice(domains[index], cleanDomains) {
 			for _, v := range domainBlacklist {
 				if !v.MatchString(domains[index]) {
 					cleanDomains = append(cleanDomains, domains[index])
@@ -62,5 +65,5 @@ func cleanDomains(domains []string) []string {
 			}
 		}
 	}
-	return dedup(cleanDomains)
+	return Dedup(cleanDomains)
 }
