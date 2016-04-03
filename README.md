@@ -4,12 +4,19 @@
 
 Cacador (Portugese for hunter) is tool for extracting common [indicators of compromise](https://en.wikipedia.org/wiki/Indicator_of_compromise) from a block of text.
 
-## Compiling & Running
+## The Short Way: Downloading Cacador
+
+The easiest way to get cacador is to [download the latest release for your platform](https://github.com/sroberts/cacador/releases). Good? Great.
+
+## The Long Way: Compiling Cacador
 
 - Install golang
 - `go get github.com/sroberts/cacador`
-- Compile with `go build cacador.go`
-- Run with `./cacador`. It accepts text from stdin and writes a JSON blob of IOCs to stdout. For example `cat text.txt | ./cacador | import` where text is some IOC rich text and import pushes your new IOCs into your threat management system.
+- Compile with `go build`
+
+## Running
+
+Run with `./cacador`. It accepts text from stdin and writes a JSON blob of IOCs to stdout. For example `cat text.txt | ./cacador | import` where text is some IOC rich text and import pushes your new IOCs into your threat management system.
 
 Cacador does recognize two command line flags:
 - `-comment="Foo"` which makes it possible to leave a note as metadata.
@@ -17,4 +24,4 @@ Cacador does recognize two command line flags:
 
 ## Why?
 
-Other tools for doing indicator extraction are pretty awesome (like ioc-extractor), but what's nice about cacador is you can compile it and put it in your path and use it for Unix style workflows with pipes and things. Also it's super fast and was a good excuse to learn [Go](http://golang.org).
+Other tools for doing indicator extraction are pretty awesome (like [armbues/ioc_parser](https://github.com/armbues/ioc_parser) or [sroberts/jager](https://github.com/sroberts/jager)), but what's nice about cacador is you can compile it and put it in your path and use it for Unix style workflows with [pipes and things](http://www.december.com/unix/tutor/pipesfilters.html). Also it's super fast and was a good excuse to learn [Go](http://golang.org).
