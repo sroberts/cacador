@@ -41,7 +41,7 @@ type files struct {
 }
 
 type utilities struct {
-	Cves []string `json:"md5s"`
+	Cves []string `json:"cves"`
 }
 
 type cacadordata struct {
