@@ -1,6 +1,6 @@
 # cacador
 
-[![codebeat badge](https://codebeat.co/badges/5c1a1d71-4d26-4833-84ac-a1be85bc3bbc)](https://codebeat.co/projects/github-com-sroberts-cacador)
+[![Go Report Card](https://goreportcard.com/badge/github.com/sroberts/cacador)](https://goreportcard.com/report/github.com/sroberts/cacador)
 
 Cacador (Portugese for hunter) is tool for extracting common [indicators of compromise](https://en.wikipedia.org/wiki/Indicator_of_compromise) from a block of text.
 
