@@ -5,10 +5,10 @@ import (
 	"strings"
 )
 
-//Summarizer
+//Summarizer generates a summary of given text
 func Summarizer(title, text string) string {
 
-	s := summarize.NewFromString(title, text)
+	s := summarize.NewFromString(title, strings.Replace(text, "\n", " ", -1))
 	return strings.Join(s.KeyPoints(), "  ")
 }
 
