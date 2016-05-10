@@ -1,8 +1,16 @@
 package aux
 
 import (
+	"github.com/urandom/text-summary/summarize"
 	"strings"
 )
+
+//Summarizer
+func Summarizer(title, text string) string {
+
+	s := summarize.NewFromString(title, text)
+	return strings.Join(s.KeyPoints(), "  ")
+}
 
 //StringInSlice identifies if a string is in a slice
 func StringInSlice(element string, list []string) bool {

@@ -12,7 +12,7 @@ import (
 	"github.com/sroberts/cacador/aux"
 )
 
-var cacadorversion = "0.0.1"
+var cacadorversion = "0.0.2"
 
 type hashes struct {
 	Md5s    []string `json:"md5s"`
@@ -52,6 +52,7 @@ type cacadordata struct {
 	Comments  string    `json:"comments"`
 	Tags      []string  `json:"tags"`
 	Time      string    `json:"time"`
+	Summary   string    `json:"summary"`
 }
 
 func getHashStrings(data string) hashes {
@@ -109,6 +110,7 @@ func main() {
 	comments := flag.String("comment", "Automatically imported.", "Adds a note to the export.")
 	tags := flag.String("tags", "", "Adds a list of tags to the export (comma seperated).")
 	version := flag.Bool("version", false, "Returns the current version of Cacador.")
+	title := flag.String("title", "N/A", "Sets the title of the imported document.")
 	flag.Parse()
 
 	if *version {
@@ -131,6 +133,7 @@ func main() {
 	c.Comments = *comments
 	c.Tags = tagslist
 	c.Time = time.Now().String()
+	c.Summary = aux.Summarizer(*title, data)
 
 	b, _ := json.Marshal(c)
 
