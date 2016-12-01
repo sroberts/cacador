@@ -107,7 +107,7 @@ func getUtilityStrings(data string) utilities {
 func main() {
 
 	comments := flag.String("comment", "Automatically imported.", "Adds a note to the export.")
-	tags := flag.String("tags", "", "Adds a list of tags to the export (comma seperated).")
+	tags := flag.String("tags", "", "Adds a list of tags to the export (comma separated).")
 	version := flag.Bool("version", false, "Returns the current version of Cacador.")
 	flag.Parse()
 
