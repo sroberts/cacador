@@ -1,8 +1,6 @@
 package aux
 
-import (
-	"strings"
-)
+import "strings"
 
 //StringInSlice identifies if a string is in a slice
 func StringInSlice(element string, list []string) bool {
@@ -24,9 +22,10 @@ func Dedup(duplist []string) []string {
 		}
 	}
 
-	if cleanList == nil {
-		cleanList = []string{}
-	}
+	// I think this is redundent code, but until test coverage is better I can't know
+	// if cleanList == nil {
+	// 	cleanList = []string{}
+	// }
 
 	return cleanList
 }
@@ -36,6 +35,8 @@ func CleanIpv4(ips []string) []string {
 	for index := 0; index < len(ips); index++ {
 		ips[index] = strings.Replace(ips[index], "[", "", -1)
 		ips[index] = strings.Replace(ips[index], "]", "", -1)
+		ips[index] = strings.Replace(ips[index], "(", "", -1)
+		ips[index] = strings.Replace(ips[index], ")", "", -1)
 	}
 	return Dedup(ips)
 }
@@ -56,14 +57,11 @@ func CleanUrls(urls []string) []string {
 func CleanDomains(domains []string) []string {
 	var cleanDomains []string
 
-	for index := 0; index < len(domains); index++ {
-		if !StringInSlice(domains[index], cleanDomains) {
-			for _, v := range domainBlacklist {
-				if !v.MatchString(domains[index]) {
-					cleanDomains = append(cleanDomains, domains[index])
-				}
-			}
+	for _, domain := range domains {
+		if !IsBlacklisted(domain) {
+			cleanDomains = append(cleanDomains, domain)
 		}
 	}
+
 	return Dedup(cleanDomains)
 }
