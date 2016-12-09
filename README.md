@@ -2,6 +2,7 @@
 
 [![CircleCI](https://circleci.com/gh/sroberts/cacador.svg?style=svg)](https://circleci.com/gh/sroberts/cacador)
 [![Go Report Card](https://goreportcard.com/badge/github.com/sroberts/cacador)](https://goreportcard.com/report/github.com/sroberts/cacador)
+[![codecov](https://codecov.io/gh/sroberts/cacador/branch/master/graph/badge.svg)](https://codecov.io/gh/sroberts/cacador)
 
 Cacador (Portugese for hunter) is tool for extracting common [indicators of compromise](https://en.wikipedia.org/wiki/Indicator_of_compromise) from a block of text.
 
