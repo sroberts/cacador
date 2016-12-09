@@ -1,0 +1,8 @@
+dependencies:
+  override:
+    # './...' is a relative pattern which means all subdirectories
+    - go get -t -d -v ./...
+    - go build -v
+test:
+  post:
+    - bash <(curl -s https://codecov.io/bash)
