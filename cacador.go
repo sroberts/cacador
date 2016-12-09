@@ -14,7 +14,8 @@ import (
 
 var cacadorversion = "0.0.1"
 
-type hashes struct {
+// Hashes are all the common hash types
+type Hashes struct {
 	Md5s    []string `json:"md5s"`
 	Sha1s   []string `json:"sha1s"`
 	Sha256s []string `json:"sha256s"`
@@ -22,7 +23,8 @@ type hashes struct {
 	Ssdeeps []string `json:"ssdeeps"`
 }
 
-type networks struct {
+// Networks is a struct of network IOCs
+type Networks struct {
 	Domains []string `json:"domains"`
 	Emails  []string `json:"emails"`
 	Ipv4s   []string `json:"ipv4s"`
@@ -30,7 +32,8 @@ type networks struct {
 	Urls    []string `json:"urls"`
 }
 
-type files struct {
+// Files is a struct representing File based IOCs
+type Files struct {
 	Docs    []string `json:"docs"`
 	Exes    []string `json:"exes"`
 	Flashes []string `json:"flashes"`
@@ -40,23 +43,26 @@ type files struct {
 	Zips    []string `json:"zips"`
 }
 
-type utilities struct {
+// Utilities is a struct of Utility strings
+type Utilities struct {
 	Cves []string `json:"cves"`
 }
 
-type cacadordata struct {
-	Hashes    hashes    `json:"hashes"`
-	Networks  networks  `json:"networks"`
-	Files     files     `json:"files"`
-	Utilities utilities `json:"utilities"`
+// Cacadordata represents the JSON output for cacador
+type Cacadordata struct {
+	Hashes    Hashes    `json:"hashes"`
+	Networks  Networks  `json:"Networks"`
+	Files     Files     `json:"files"`
+	Utilities Utilities `json:"Utilities"`
 	Comments  string    `json:"comments"`
 	Tags      []string  `json:"tags"`
 	Time      string    `json:"time"`
 }
 
-func getHashStrings(data string) hashes {
+// GetHashStrings takes a string and returns a struct of hashes
+func GetHashStrings(data string) Hashes {
 
-	h := hashes{}
+	h := Hashes{}
 
 	h.Md5s = aux.Dedup(aux.HashRegexs["md5"].FindAllString(data, -1))
 	h.Sha1s = aux.Dedup(aux.HashRegexs["sha1"].FindAllString(data, -1))
@@ -67,9 +73,10 @@ func getHashStrings(data string) hashes {
 	return h
 }
 
-func getNetworkStrings(data string) networks {
+// GetNetworkstrings takes a string and returns network based IOCs
+func GetNetworkstrings(data string) Networks {
 
-	n := networks{}
+	n := Networks{}
 
 	n.Domains = aux.Dedup(aux.CleanDomains(aux.NetworkRegexs["domain"].FindAllString(data, -1)))
 	n.Emails = aux.Dedup(aux.NetworkRegexs["email"].FindAllString(data, -1))
@@ -80,9 +87,10 @@ func getNetworkStrings(data string) networks {
 	return n
 }
 
-func getFilenameStrings(data string) files {
+// GetFilenameStrings takes a string and returns a struct of file IOCs
+func GetFilenameStrings(data string) Files {
 
-	f := files{}
+	f := Files{}
 
 	f.Docs = aux.Dedup(aux.FileRegexs["doc"].FindAllString(data, -1))
 	f.Exes = aux.Dedup(aux.FileRegexs["exe"].FindAllString(data, -1))
@@ -95,9 +103,10 @@ func getFilenameStrings(data string) files {
 	return f
 }
 
-func getUtilityStrings(data string) utilities {
+// GetUtilityStrings takes a string and returns utility strings
+func GetUtilityStrings(data string) Utilities {
 
-	u := utilities{}
+	u := Utilities{}
 
 	u.Cves = aux.Dedup(aux.UtilityRegexs["cve"].FindAllString(data, -1))
 
@@ -122,12 +131,12 @@ func main() {
 	bytes, _ := ioutil.ReadAll(os.Stdin)
 	data := string(bytes)
 
-	c := cacadordata{}
+	c := Cacadordata{}
 
-	c.Hashes = getHashStrings(data)
-	c.Networks = getNetworkStrings(data)
-	c.Files = getFilenameStrings(data)
-	c.Utilities = getUtilityStrings(data)
+	c.Hashes = GetHashStrings(data)
+	c.Networks = GetNetworkstrings(data)
+	c.Files = GetFilenameStrings(data)
+	c.Utilities = GetUtilityStrings(data)
 	c.Comments = *comments
 	c.Tags = tagslist
 	c.Time = time.Now().String()
