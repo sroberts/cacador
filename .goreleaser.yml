@@ -1,0 +1,11 @@
+# .goreleaser.yml
+# Build customization
+project_name: cacador
+builds:
+  - binary: cacador
+    goos:
+      - windows
+      - darwin
+      - linux
+    goarch:
+      - amd64
