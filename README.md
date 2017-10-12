@@ -29,6 +29,8 @@ Cacador does recognize two command line flags:
 - Push your branch to GitHub.
 - Tag it via `git tag -a v1.0.3 -m "Release 1.0.3 - Minor bugfix edition."`
 - Push the tag to GitHub via `git push origin v1.0.3`
+- Ensure you have a `GITHUB_TOKEN` env var set.
+- Run `goreleaser`.
 
 ## Why?
 
