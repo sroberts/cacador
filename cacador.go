@@ -115,7 +115,7 @@ func GetUtilityStrings(data string) Utilities {
 
 func main() {
 
-	comments := flag.String("comment", "Automatically imported.", "Adds a note to the export.")
+	comments := flag.String("comment", "", "Adds a note to the export.")
 	tags := flag.String("tags", "", "Adds a list of tags to the export (comma separated).")
 	version := flag.Bool("version", false, "Returns the current version of Cacador.")
 	flag.Parse()
@@ -141,7 +141,7 @@ func main() {
 	c.Tags = tagslist
 	c.Time = time.Now().String()
 
-	b, _ := json.Marshal(c)
+	b, _ := json.MarshalIndent(c," "," ")
 
 	fmt.Println(string(b))
 
