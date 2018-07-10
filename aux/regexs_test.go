@@ -29,6 +29,7 @@ func TestIsNetworkIoc(t *testing.T) {
 		{"300.300.300.300", false},
 		{"test@test.com", true},
 		{"example.com", true},
+		{"www.us-cert.gov", true},
 		{"example.pumpkin", false},
 		{"https://www.example.com/foo/bar?baz=1", true},
 	}

@@ -24,8 +24,8 @@ func TestCleanIPs(t *testing.T) {
 }
 
 func TestCleanDomains(t *testing.T) {
-	got := []string{"foo.com", "bar.com", "example.com", "mandiant.com"}
-	want := []string{"foo.com", "bar.com"}
+	got := []string{"foo.com", "bar.com", "example.com", "mandiant.com", "www.us-cert.gov"}
+	want := []string{"foo.com", "bar.com", "www.us-cert.gov"}
 
 	if s := CleanDomains(got); !reflect.DeepEqual(s, want) {
 		t.Errorf("Not removing blacklisted domains. %v", s)
