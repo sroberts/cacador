@@ -4,10 +4,10 @@ import "regexp"
 
 // HashRegexs include all file hash types
 var HashRegexs = map[string]*regexp.Regexp{
-	"md5":    regexp.MustCompile("[A-Fa-f0-9]{32}"),
-	"sha1":   regexp.MustCompile("[A-Fa-f0-9]{40}"),
-	"sha256": regexp.MustCompile("[A-Fa-f0-9]{64}"),
-	"sha512": regexp.MustCompile("[A-Fa-f0-9]{128}"),
+	"md5":    regexp.MustCompile("\\b[A-Fa-f0-9]{32}\\b"),
+	"sha1":   regexp.MustCompile("\\b[A-Fa-f0-9]{40}\\b"),
+	"sha256": regexp.MustCompile("\\b[A-Fa-f0-9]{64}\\b"),
+	"sha512": regexp.MustCompile("\\b[A-Fa-f0-9]{128}\\b"),
 	"ssdeep": regexp.MustCompile("\\d{2}:[A-Za-z0-9/+]{3,}:[A-Za-z0-9/+]{3,}"),
 }
 
